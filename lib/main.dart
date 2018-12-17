@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart';
+import 'db.dart';
+import 'meal.dart';
+import 'mealui.dart';
 
 void main() => runApp(DinnerVoteApp());
 
@@ -27,8 +29,15 @@ class DinnerListPage extends StatefulWidget {
 }
 
 class _DinnerListPageState extends State<DinnerListPage> {
-  final _dinners = <String>['Turkey Soup', 'Taco Noodles'];
   final _biggerFont = const TextStyle(fontSize: 20.0);
+  final _dinners = new List<Meal>();
+  final _db = DbHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMeals();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +46,16 @@ class _DinnerListPageState extends State<DinnerListPage> {
         title: Text(widget.title),
       ),
       body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _createMeal(context),
+      ),
     );
   }
 
   Widget _buildBody() {
     return ListView.builder(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(6.0),
         itemCount: _dinners.length * 2,
         itemBuilder: (context, i) {
           if (i.isOdd) return Divider();
@@ -52,12 +65,33 @@ class _DinnerListPageState extends State<DinnerListPage> {
         });
   }
 
-  Widget _buildRow(String dinner) {
+  Widget _buildRow(Meal dinner) {
     return ListTile(
       title: Text(
-        dinner,
+        dinner.title,
         style: _biggerFont,
       ),
     );
+  }
+
+  _createMeal(BuildContext context) async {
+    String result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MealScreen(Meal("", ""))),
+    );
+    if (result == 'save') {
+      _loadMeals();
+    }
+  }
+
+  _loadMeals() async {
+    _db.getAllMeals().then((meals) {
+      setState(() {
+        _dinners.clear();
+        meals.forEach((meal) {
+          _dinners.add(Meal.fromMap(meal));
+        });
+      });
+    });
   }
 }
