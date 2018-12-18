@@ -71,6 +71,7 @@ class _DinnerListPageState extends State<DinnerListPage> {
         dinner.title,
         style: _biggerFont,
       ),
+      onTap: () => _editMeal(context, dinner),
     );
   }
 
@@ -93,5 +94,15 @@ class _DinnerListPageState extends State<DinnerListPage> {
         });
       });
     });
+  }
+
+  _editMeal(BuildContext context, Meal dinner) async {
+    String result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MealScreen(dinner)),
+    );
+    if (result == 'update') {
+      _loadMeals();
+    }
   }
 }

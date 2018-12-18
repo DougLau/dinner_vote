@@ -44,7 +44,8 @@ class DbHelper {
     await db.execute("CREATE TABLE meal ("
         "id INTEGER PRIMARY KEY,"
         "title TEXT NOT NULL,"
-        "description TEXT"
+        "description TEXT,"
+        "on_menu INTEGER NOT NULL" // 0: no, 1: yes
         ")");
     await db.execute("CREATE TABLE person ("
         "id INTEGER PRIMARY KEY,"
@@ -68,7 +69,7 @@ class DbHelper {
 
   Future<List> getAllMeals() async {
     var dbi = await db;
-    var meals = await dbi.query('meal', columns: ['id', 'title', 'description']);
+    var meals = await dbi.query('meal', columns: ['id', 'title', 'description', 'on_menu']);
     return meals.toList();
   }
 
