@@ -2,6 +2,91 @@ import 'package:flutter/material.dart';
 import 'meal.dart';
 import 'db.dart';
 
+class MealListPage extends StatefulWidget {
+  MealListPage({Key key, this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  _MealListPageState createState() => _MealListPageState();
+}
+
+class _MealListPageState extends State<MealListPage> {
+  final _dinners = new List<Meal>();
+  final _db = DbHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMeals();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: _buildBody(),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _createMeal(context),
+      ),
+    );
+  }
+
+  Widget _buildBody() {
+    return ListView.builder(
+        padding: const EdgeInsets.all(6.0),
+        itemCount: _dinners.length,
+        itemBuilder: (context, i) {
+          return _buildRow(_dinners[i]);
+        });
+  }
+
+  Widget _buildRow(Meal dinner) {
+    return ListTile(
+      title: Text(
+        dinner.title,
+        style: Theme.of(context).textTheme.title,
+      ),
+      subtitle: Text(dinner.description),
+      onTap: () => _editMeal(context, dinner),
+    );
+  }
+
+  _createMeal(BuildContext context) async {
+    String result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MealPage(Meal("", ""))),
+    );
+    if (result == 'save') {
+      _loadMeals();
+    }
+  }
+
+  _loadMeals() async {
+    _db.getAllMeals().then((meals) {
+      setState(() {
+        _dinners.clear();
+        meals.forEach((meal) {
+          _dinners.add(Meal.fromMap(meal));
+        });
+      });
+    });
+  }
+
+  _editMeal(BuildContext context, Meal dinner) async {
+    String result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MealPage(dinner)),
+    );
+    if (result == 'update' || result == 'delete') {
+      _loadMeals();
+    }
+  }
+}
+
 class MealPage extends StatefulWidget {
   final Meal meal;
   MealPage(this.meal);
