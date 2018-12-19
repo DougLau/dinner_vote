@@ -12,7 +12,11 @@ class DinnerVoteApp extends StatelessWidget {
     return MaterialApp(
       title: title,
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primaryColor: Color(0xFF3832AC),
+        primaryColorLight: Color(0xFF705DDF),
+        primaryColorDark: Color(0xFF000A7C),
+        accentColor: Color(0xFFFFA866),
+        cardColor: Color(0xFFDDDDDD),
       ),
       home: DinnerListPage(title: title),
     );
@@ -29,7 +33,6 @@ class DinnerListPage extends StatefulWidget {
 }
 
 class _DinnerListPageState extends State<DinnerListPage> {
-  final _biggerFont = const TextStyle(fontSize: 20.0);
   final _dinners = new List<Meal>();
   final _db = DbHelper();
 
@@ -56,12 +59,9 @@ class _DinnerListPageState extends State<DinnerListPage> {
   Widget _buildBody() {
     return ListView.builder(
         padding: const EdgeInsets.all(6.0),
-        itemCount: _dinners.length * 2,
+        itemCount: _dinners.length,
         itemBuilder: (context, i) {
-          if (i.isOdd) return Divider();
-
-          final index = i ~/ 2;
-          return _buildRow(_dinners[index]);
+          return _buildRow(_dinners[i]);
         });
   }
 
@@ -69,8 +69,9 @@ class _DinnerListPageState extends State<DinnerListPage> {
     return ListTile(
       title: Text(
         dinner.title,
-        style: _biggerFont,
+        style: Theme.of(context).textTheme.title,
       ),
+      subtitle: Text(dinner.description),
       onTap: () => _editMeal(context, dinner),
     );
   }
@@ -78,7 +79,7 @@ class _DinnerListPageState extends State<DinnerListPage> {
   _createMeal(BuildContext context) async {
     String result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MealScreen(Meal("", ""))),
+      MaterialPageRoute(builder: (context) => MealPage(Meal("", ""))),
     );
     if (result == 'save') {
       _loadMeals();
@@ -99,9 +100,9 @@ class _DinnerListPageState extends State<DinnerListPage> {
   _editMeal(BuildContext context, Meal dinner) async {
     String result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MealScreen(dinner)),
+      MaterialPageRoute(builder: (context) => MealPage(dinner)),
     );
-    if (result == 'update') {
+    if (result == 'update' || result == 'delete') {
       _loadMeals();
     }
   }

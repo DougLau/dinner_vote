@@ -2,7 +2,7 @@ class Meal {
   int id;
   String title;
   String description;
-  int on_menu = 0;
+  String tags;
 
   Meal(this.title, this.description);
 
@@ -10,7 +10,6 @@ class Meal {
     var map = <String, dynamic>{
       'title': title,
       'description': description,
-      'on_menu': on_menu,
     };
     if (id != null) {
       map['id'] = id;
@@ -22,6 +21,9 @@ class Meal {
     id = map['id'];
     title = map['title'];
     description = map['description'];
-    on_menu = map['on_menu'];
+  }
+
+  bool hasTag(String tag) {
+    return (tag == 'Chicken');
   }
 }

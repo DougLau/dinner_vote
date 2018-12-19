@@ -43,22 +43,30 @@ class DbHelper {
   _createDB(Database db, int version) async {
     await db.execute("CREATE TABLE meal ("
         "id INTEGER PRIMARY KEY,"
-        "title TEXT NOT NULL,"
-        "description TEXT,"
-        "on_menu INTEGER NOT NULL" // 0: no, 1: yes
+        "title TEXT NOT NULL UNIQUE,"
+        "description TEXT"
+        ")");
+    await db.execute("CREATE TABLE tag ("
+        "id INTEGER PRIMARY KEY,"
+        "value TEXT NOT NULL UNIQUE,"
+        "on_menu INTEGER NOT NULL CHECK(on_menu = 0 OR on_menu = 1)"
+        ")");
+    await db.execute("CREATE TABLE meal_tag ("
+        "id INTEGER PRIMARY KEY,"
+        "meal_id INTEGER NOT NULL REFERENCES meal ON DELETE CASCADE,"
+        "tag_id INTEGER NOT NULL REFERENCES tag ON DELETE CASCADE,"
+        "UNIQUE(meal_id, tag_id)"
         ")");
     await db.execute("CREATE TABLE person ("
         "id INTEGER PRIMARY KEY,"
-        "name TEXT"
+        "name TEXT NOT NULL UNIQUE"
         ")");
     await db.execute("CREATE TABLE vote ("
         "id INTEGER PRIMARY KEY,"
-        "meal INTEGER NOT NULL,"
-        "person INTEGER NOT NULL,"
+        "meal_id INTEGER NOT NULL REFERENCES meal ON DELETE CASCADE,"
+        "person_id INTEGER NOT NULL REFERENCES person ON DELETE CASCADE,"
         "requested TEXT NOT NULL," // ISO-8601: YYYY-MM-DD
-        "prepared TEXT," //           NULL if not prepared yet
-        "FOREIGN KEY (meal) REFERENCES meal,"
-        "FOREIGN KEY (person) REFERENCES person"
+        "prepared TEXT" //            NULL if not prepared yet
         ")");
   }
 
@@ -69,7 +77,8 @@ class DbHelper {
 
   Future<List> getAllMeals() async {
     var dbi = await db;
-    var meals = await dbi.query('meal', columns: ['id', 'title', 'description', 'on_menu']);
+    var meals = await dbi.query('meal',
+        columns: ['id', 'title', 'description'], orderBy: 'title');
     return meals.toList();
   }
 
@@ -80,6 +89,7 @@ class DbHelper {
 
   Future<int> updateMeal(Meal meal) async {
     var dbi = await db;
-    return await dbi.update('meal', meal.toMap(), where: 'id = ?', whereArgs: [meal.id]);
+    return await dbi
+        .update('meal', meal.toMap(), where: 'id = ?', whereArgs: [meal.id]);
   }
 }
