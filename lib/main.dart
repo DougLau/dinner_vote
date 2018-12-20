@@ -1,16 +1,42 @@
 import 'package:flutter/material.dart';
-import 'db.dart';
-import 'meal.dart';
 import 'mealui.dart';
 
 void main() => runApp(DinnerVoteApp());
 
-class DinnerVoteApp extends StatelessWidget {
+final key = GlobalKey<DinnerVoteAppState>();
+
+class DinnerVoteApp extends StatefulWidget {
+
+  DinnerVoteApp(): super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => DinnerVoteAppState();
+}
+
+class DrawerItem {
+  final String title;
+  final IconData icon;
+  final Widget page;
+
+  DrawerItem(this.title, this.icon, this.page);
+}
+
+class DinnerVoteAppState extends State<DinnerVoteApp> {
+
+  final items = [
+    DrawerItem('Meals', Icons.info, MealListPage(key)),
+  ];
+
+  var item;
+
+  DinnerVoteAppState() {
+    item = items[0];
+  }
+
   @override
   Widget build(BuildContext context) {
-    var title = 'Dinner Vote';
     return MaterialApp(
-      title: title,
+      title: 'Dinner Vote',
       theme: ThemeData(
         primaryColor: Color(0xFF3832AC),
         primaryColorLight: Color(0xFF705DDF),
@@ -18,7 +44,39 @@ class DinnerVoteApp extends StatelessWidget {
         accentColor: Color(0xFFFFA866),
         cardColor: Color(0xFFDDDDDD),
       ),
-      home: MealListPage(title: title),
+      home: item.page,
     );
+  }
+
+  Drawer getDrawer(BuildContext context) {
+    final tiles = <Widget>[];
+    tiles.add(DrawerHeader(
+      child: Text('Pages'),
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColorLight,
+      ),
+    ));
+    for (var i = 0; i < items.length; i++) {
+      final di = items[i];
+      tiles.add(
+        ListTile(
+          leading: Icon(di.icon),
+          title: Text(di.title),
+          selected: item == items[i],
+          onTap: () => _onSelectItem(context, i),
+        )
+      );
+    }
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: tiles,
+      ),
+    );
+  }
+
+  _onSelectItem(BuildContext context, int index) {
+    setState(() => item = items[index]);
+    Navigator.of(context).pop();
   }
 }

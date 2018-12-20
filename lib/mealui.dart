@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'main.dart';
 import 'meal.dart';
 import 'db.dart';
 
 class MealListPage extends StatefulWidget {
-  MealListPage({Key key, this.title}) : super(key: key);
+  final GlobalKey<DinnerVoteAppState> appKey;
 
-  final String title;
+  MealListPage(appKey) : appKey = appKey;
 
   @override
   _MealListPageState createState() => _MealListPageState();
@@ -25,8 +26,9 @@ class _MealListPageState extends State<MealListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text('Dinner Vote: Meals'),
       ),
+      drawer: widget.appKey.currentState.getDrawer(context),
       body: _buildBody(),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
@@ -44,14 +46,14 @@ class _MealListPageState extends State<MealListPage> {
         });
   }
 
-  Widget _buildRow(Meal dinner) {
+  Widget _buildRow(Meal meal) {
     return ListTile(
       title: Text(
-        dinner.title,
+        meal.title,
         style: Theme.of(context).textTheme.title,
       ),
-      subtitle: Text(dinner.description),
-      onTap: () => _editMeal(context, dinner),
+      subtitle: Text(meal.description),
+      onTap: () => _editMeal(context, meal),
     );
   }
 
@@ -76,10 +78,10 @@ class _MealListPageState extends State<MealListPage> {
     });
   }
 
-  _editMeal(BuildContext context, Meal dinner) async {
+  _editMeal(BuildContext context, Meal meal) async {
     String result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MealPage(dinner)),
+      MaterialPageRoute(builder: (context) => MealPage(meal)),
     );
     if (result == 'update' || result == 'delete') {
       _loadMeals();
@@ -261,7 +263,7 @@ class _MealBodyState extends State<MealBody> {
 
   _saveMeal(BuildContext context) {
     final title = _getTitle();
-    if (title == 0)
+    if (title.length == 0)
       return;
     db.saveMeal(Meal(title, _getDescription())).then((_) {
       Navigator.pop(context, 'save');
