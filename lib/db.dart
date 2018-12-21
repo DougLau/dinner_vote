@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:synchronized/synchronized.dart';
 import 'meal.dart';
+import 'person.dart';
 
 class DbHelper {
   static final DbHelper _singleton = DbHelper._internal();
@@ -91,5 +92,28 @@ class DbHelper {
     var dbi = await db;
     return await dbi
         .update('meal', meal.toMap(), where: 'id = ?', whereArgs: [meal.id]);
+  }
+
+  Future<int> savePerson(Person person) async {
+    var dbi = await db;
+    return await dbi.insert('person', person.toMap());
+  }
+
+  Future<List> getAllPeople() async {
+    var dbi = await db;
+    var people = await dbi.query('person',
+        columns: ['id', 'name'], orderBy: 'name');
+    return people.toList();
+  }
+
+  Future<int> deletePerson(int id) async {
+    var dbi = await db;
+    return await dbi.delete('person', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> updatePerson(Person person) async {
+    var dbi = await db;
+    return await dbi
+        .update('person', person.toMap(), where: 'id = ?', whereArgs: [person.id]);
   }
 }

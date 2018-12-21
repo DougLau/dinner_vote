@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'mealui.dart';
+import 'person_ui.dart';
 
 void main() => runApp(DinnerVoteApp());
 
@@ -25,6 +26,7 @@ class DinnerVoteAppState extends State<DinnerVoteApp> {
 
   final items = [
     DrawerItem('Meals', Icons.info, MealListPage(key)),
+    DrawerItem('People', Icons.person, PersonListPage(key)),
   ];
 
   var item;
